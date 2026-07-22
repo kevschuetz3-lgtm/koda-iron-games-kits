@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Koda Iron Games 26 — Team Kit Builder</title>
+<link rel="icon" type="image/png" href="assets/sleeve.png">
+<meta property="og:title" content="Koda Iron Games 26 — Team Kit Builder">
+<meta property="og:description" content="Build your team's two-day apparel kit: pick your shirts, print colors, and sizes. Orders due September 18.">
+<meta name="description" content="Koda Iron Games 26 team apparel kit builder — two shirts per athlete, included with registration.">
+<style>
+  @font-face { font-family: 'Tungsten'; src: url('assets/fonts/Tungsten-Bold.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Tungsten'; src: url('assets/fonts/Tungsten-Semibold.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Tungsten'; src: url('assets/fonts/Tungsten-Black.woff2') format('woff2'); font-weight: 900; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Tungsten'; src: url('assets/fonts/Tungsten-Book.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+
+  :root {
+    --red: #d4291a;
+    --ink: #131313;
+    --paper: #f5f4f2;
+    --muted: #6b6b6b;
+    --line: #e2e0dc;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Poppins', -apple-system, 'Segoe UI', sans-serif; background: var(--paper); color: var(--ink); }
+  .tung { font-family: 'Tungsten', 'Arial Narrow', sans-serif; text-transform: uppercase; }
+
+  /* ── Hero ── */
+  header {
+    background: var(--ink); color: #fff; text-align: center;
+    padding: 52px 20px 60px; position: relative; overflow: hidden;
+  }
+  header::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 50% -20%, rgba(212,41,26,.28), transparent 55%);
+  }
+  .hero-mark {
+    width: 120px; aspect-ratio: .988; margin: 0 auto 18px;
+    background: #fff;
+    -webkit-mask: url('assets/sleeve.png') center/contain no-repeat; mask: url('assets/sleeve.png') center/contain no-repeat;
+  }
+  header h1 { font-family: 'Tungsten'; font-weight: 900; text-transform: uppercase; font-size: clamp(64px, 12vw, 130px); line-height: .9; letter-spacing: .01em; }
+  header h1 .accent { color: var(--red); }
+  .hero-rule {
+    width: min(420px, 70vw); aspect-ratio: 10.2; margin: 18px auto 14px;
+    background: var(--red);
+    -webkit-mask: url('assets/vi-line.png') center/contain no-repeat; mask: url('assets/vi-line.png') center/contain no-repeat;
+  }
+  .hero-sub { font-family: 'Tungsten'; font-weight: 400; text-transform: uppercase; letter-spacing: .28em; font-size: clamp(15px, 3vw, 21px); color: #cfcfcf; }
+  .hero-pill {
+    display: inline-block; margin-top: 22px; padding: 9px 20px; border: 1px solid rgba(255,255,255,.35);
+    border-radius: 999px; font-size: 13px; color: #eee; letter-spacing: .04em; position: relative; z-index: 1;
+  }
+  .hero-pill b { color: #fff; }
+
+  /* ── Sections ── */
+  main { max-width: 1060px; margin: 0 auto; padding: 0 16px 90px; }
+  section.step { background: #fff; border: 1px solid var(--line); border-radius: 16px; margin-top: 26px; padding: 30px clamp(18px, 4vw, 40px) 36px; box-shadow: 0 2px 10px rgba(0,0,0,.04); }
+  .step-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 6px; }
+  .step-num { font-family: 'Tungsten'; font-weight: 900; font-size: 44px; color: var(--red); line-height: 1; }
+  .step-head h2 { font-family: 'Tungsten'; font-weight: 700; text-transform: uppercase; font-size: clamp(30px, 5vw, 40px); line-height: 1; letter-spacing: .015em; }
+  .step-sub { color: var(--muted); font-size: 14.5px; margin-bottom: 22px; }
+
+  /* Division grid */
+  .div-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  @media (max-width: 640px) { .div-grid { grid-template-columns: repeat(2, 1fr); } }
+  .div-card {
+    border: 2px solid var(--line); border-radius: 12px; padding: 18px 10px 14px; text-align: center;
+    cursor: pointer; background: #fff; transition: border-color .15s, transform .1s;
+  }
+  .div-card:hover { border-color: #bbb; transform: translateY(-1px); }
+  .div-card.sel { border-color: var(--red); background: #fdf3f2; }
+  .div-card .tung { font-weight: 700; font-size: 30px; line-height: .95; }
+  .div-card small { color: var(--muted); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; }
+  .div-card.sel small { color: var(--red); }
+
+  /* Team name */
+  .team-input { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  #team-name {
+    flex: 1; min-width: 240px; font-family: 'Tungsten'; font-weight: 700; text-transform: uppercase;
+    font-size: 34px; padding: 8px 16px; border: 2px solid var(--line); border-radius: 10px; letter-spacing: .02em;
+  }
+  #team-name:focus { outline: none; border-color: var(--ink); }
+  .char-note { font-size: 12.5px; color: var(--muted); }
+  .name-preview-wrap { margin-top: 22px; background: var(--ink); border-radius: 12px; padding: clamp(18px, 4vw, 34px); }
+  .name-preview-label { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: #888; margin-bottom: 14px; }
+
+  /* Kit builder */
+  .kit-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+  @media (max-width: 880px) { .kit-cols { grid-template-columns: 1fr; } }
+  .opt-label { font-family: 'Tungsten'; font-weight: 600; text-transform: uppercase; font-size: 21px; letter-spacing: .04em; margin: 20px 0 10px; }
+  .opt-label:first-child { margin-top: 0; }
+  .opt-label small { font-family: 'Poppins'; font-size: 11.5px; text-transform: none; letter-spacing: 0; color: var(--muted); font-weight: 400; margin-left: 8px; }
+
+  .garment-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+  .garment-tab {
+    flex: 1; padding: 10px; text-align: center; border: 2px solid var(--line); border-radius: 10px; cursor: pointer;
+    font-family: 'Tungsten'; font-weight: 600; text-transform: uppercase; font-size: 20px; letter-spacing: .04em;
+  }
+  .garment-tab.sel { border-color: var(--ink); background: var(--ink); color: #fff; }
+
+  .shirt-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; }
+  @media (max-width: 480px) { .shirt-grid { grid-template-columns: repeat(3, 1fr); } }
+  .shirt-card { border: 2px solid var(--line); border-radius: 10px; padding: 6px 4px 7px; cursor: pointer; text-align: center; background: #fff; }
+  .shirt-card img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; background: #fff; }
+  .shirt-card div { font-size: 10.5px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; margin-top: 4px; line-height: 1.25; }
+  .shirt-card.sel { border-color: var(--red); background: #fdf3f2; }
+
+  .swatches { display: flex; flex-wrap: wrap; gap: 9px; }
+  .swatch { width: 44px; height: 44px; border-radius: 50%; cursor: pointer; border: 2px solid rgba(0,0,0,.14); position: relative; }
+  .swatch.sel::after { content: ''; position: absolute; inset: -6px; border: 2.5px solid var(--red); border-radius: 50%; }
+  .swatch[data-light="1"] { border-color: #c9c9c9; }
+  .swatch-name { font-size: 12.5px; color: var(--muted); margin-top: 8px; min-height: 18px; }
+  .contrast-warn { display: none; margin-top: 8px; font-size: 12.5px; color: #a15c00; background: #fff6e8; border: 1px solid #f2ddb5; padding: 7px 10px; border-radius: 8px; }
+  .contrast-warn.show { display: block; }
+
+  /* Mockup */
+  .mockup-sticky { position: sticky; top: 14px; }
+  .mockup-frame { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 12px; }
+  .mockup-stage { position: relative; width: 100%; }
+  .mockup-stage img.shirt-photo { width: 100%; display: block; border-radius: 8px; }
+  .print-chest { position: absolute; }
+  .print-sleeve { position: absolute; }
+  .detail-chips { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .chip { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .chip .chip-art { height: 108px; display: flex; align-items: center; justify-content: center; }
+  .chip .chip-cap { font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; text-align: center; padding: 6px 4px; background: #fafaf8; color: #555; }
+  .mockup-day-label { font-family: 'Tungsten'; font-weight: 700; font-size: 24px; text-transform: uppercase; text-align: center; padding: 4px 0 8px; }
+
+  /* Sizes */
+  .size-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .size-cell label { font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 5px; }
+  .size-cell select { width: 100%; padding: 10px 8px; border: 2px solid var(--line); border-radius: 9px; font-size: 15px; font-family: inherit; background: #fff; }
+
+  /* Captain / review */
+  .cap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 640px) { .cap-grid { grid-template-columns: 1fr; } }
+  .field label { display: block; font-size: 12px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .field input { width: 100%; padding: 12px 14px; border: 2px solid var(--line); border-radius: 10px; font-size: 15.5px; font-family: inherit; }
+  .field input:focus { outline: none; border-color: var(--ink); }
+  .review-box { background: var(--paper); border-radius: 12px; padding: 18px 20px; margin-top: 22px; font-size: 14.5px; line-height: 1.75; }
+  .review-box b { font-weight: 600; }
+  .review-missing { color: var(--red); font-weight: 600; }
+  #submit-btn {
+    margin-top: 22px; width: 100%; padding: 18px; border: none; border-radius: 12px; cursor: pointer;
+    background: var(--red); color: #fff; font-family: 'Tungsten'; font-weight: 700; text-transform: uppercase;
+    font-size: 30px; letter-spacing: .06em; transition: transform .1s, opacity .15s;
+  }
+  #submit-btn:hover:not(:disabled) { transform: translateY(-1px); }
+  #submit-btn:disabled { background: #b9b6b1; cursor: not-allowed; }
+  .submit-note { text-align: center; font-size: 12.5px; color: var(--muted); margin-top: 10px; }
+
+  /* Success overlay */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(12,12,12,.95); z-index: 50; display: none;
+    align-items: center; justify-content: center; padding: 20px; text-align: center; color: #fff;
+  }
+  .overlay.show { display: flex; }
+  .overlay .inner { max-width: 560px; }
+  .overlay .hero-rule { margin: 22px auto; }
+  .overlay h2 { font-family: 'Tungsten'; font-weight: 900; text-transform: uppercase; font-size: clamp(52px, 10vw, 84px); line-height: .92; }
+  .overlay p { color: #d5d5d5; font-size: 15.5px; line-height: 1.7; margin-top: 8px; }
+  .overlay a { color: #fff; }
+
+  footer { text-align: center; padding: 34px 16px 46px; color: #9a978f; font-size: 12.5px; }
+  footer a { color: #6b6b6b; }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header>
+  <div class="hero-mark"></div>
+  <h1>Team Kit <span class="accent">Builder</span></h1>
+  <div class="hero-rule"></div>
+  <div class="hero-sub">Koda Iron Games 26 &bull; October 3–4</div>
+  <div class="hero-pill">Two shirts per athlete &bull; included with your registration &bull; order by <b>September 18</b></div>
+</header>
+
+<main>
+  <!-- STEP 1: DIVISION -->
+  <section class="step" id="step-division">
+    <div class="step-head"><div class="step-num">1</div><h2>Your Division</h2></div>
+    <p class="step-sub">Teams of 3 — pick the division you registered in.</p>
+    <div class="div-grid" id="div-grid"></div>
+  </section>
+
+  <!-- STEP 2: TEAM NAME -->
+  <section class="step" id="step-name">
+    <div class="step-head"><div class="step-num">2</div><h2>Team Name</h2></div>
+    <p class="step-sub">Printed across the chest of every shirt, in the official Iron Games type. Short names print big; longer names break onto two lines.</p>
+    <div class="team-input">
+      <input id="team-name" type="text" maxlength="42" placeholder="YOUR TEAM NAME" autocomplete="off">
+      <span class="char-note"><span id="char-count">0</span>/42</span>
+    </div>
+    <div class="name-preview-wrap">
+      <div class="name-preview-label">Print preview</div>
+      <div id="name-preview"></div>
+    </div>
+  </section>
+
+  <!-- STEP 3 / 4: DAY KITS (built by JS) -->
+  <section class="step" id="step-day1"></section>
+  <section class="step" id="step-day2"></section>
+
+  <!-- STEP 5: REVIEW -->
+  <section class="step" id="step-review">
+    <div class="step-head"><div class="step-num">5</div><h2>Lock It In</h2></div>
+    <p class="step-sub">Your kit spec goes straight to our print shop. We'll email you a confirmation copy.</p>
+    <div class="cap-grid">
+      <div class="field"><label>Captain name</label><input id="cap-name" type="text" autocomplete="name"></div>
+      <div class="field"><label>Captain email</label><input id="cap-email" type="email" autocomplete="email"></div>
+    </div>
+    <div class="review-box" id="review-box"></div>
+    <button id="submit-btn" disabled>Submit Team Kit</button>
+    <p class="submit-note">Need a change after submitting? Email <a href="mailto:kodacustomapparel@gmail.com">kodacustomapparel@gmail.com</a>.</p>
+  </section>
+</main>
+
+<div class="overlay" id="success-overlay">
+  <div class="inner">
+    <h2>Kit Locked In</h2>
+    <div class="hero-rule"></div>
+    <p id="success-msg"></p>
+    <p style="margin-top:18px">See you on the competition floor. &#128293;</p>
+  </div>
+</div>
+
+<footer>
+  Koda Iron Games 26 &bull; hosted by Koda CrossFit Iron View &bull; presented by WODprep<br>
+  Kit questions: <a href="mailto:kodacustomapparel@gmail.com">kodacustomapparel@gmail.com</a>
+</footer>
+
+<script src="assets/kit-core.js"></script>
+<script>
+/* ════════════════════ STATE ════════════════════ */
+const state = {
+  division: null,
+  teamName: '',
+  day1: { garment: 'unisex', shirt: null, print1: null, print2: null, sizes: [null, null, null] },
+  day2: { garment: 'unisex', shirt: null, print1: null, print2: null, sizes: [null, null, null] },
+  submitting: false,
+};
+const isFemale = () => state.division && state.division.includes('Female');
+const $ = id => document.getElementById(id);
+const vinylHex = name => (VINYL.find(v => v.name === name) || {}).hex;
+const shirtById = id => SHIRTS.find(s => s.id === id);
+
+/* ════════════════════ BUILD UI ════════════════════ */
+DIVISIONS.forEach(d => {
+  const card = document.createElement('div');
+  card.className = 'div-card'; card.dataset.id = d.id;
+  card.innerHTML = `<div class="tung">${d.top}</div><small>${d.sub} &bull; team of 3</small>`;
+  card.onclick = () => { state.division = d.id; refresh(); };
+  $('div-grid').appendChild(card);
+});
+
+$('team-name').addEventListener('input', e => {
+  state.teamName = e.target.value;
+  $('char-count').textContent = e.target.value.length;
+  refresh();
+});
+
+function buildDay(n) {
+  const sec = $('step-day' + n);
+  sec.innerHTML = `
+    <div class="step-head"><div class="step-num">${n + 2}</div><h2>Day ${n} Shirts</h2></div>
+    <p class="step-sub">${n === 1 ? 'Saturday' : 'Sunday'} — pick your shirt, then the two print colors. All 3 athletes get this shirt.</p>
+    <div class="kit-cols">
+      <div>
+        <div class="opt-label" id="d${n}-garment-label">Garment</div>
+        <div class="garment-tabs" id="d${n}-tabs">
+          <div class="garment-tab" data-g="unisex">Unisex Tee</div>
+          <div class="garment-tab" data-g="crop">Crop</div>
+        </div>
+        <div class="shirt-grid" id="d${n}-shirts"></div>
+        <div class="opt-label">Print Color 1 <small>team name &bull; “Koda Iron Games 26” &bull; sleeve logo</small></div>
+        <div class="swatches" id="d${n}-p1"></div>
+        <div class="swatch-name" id="d${n}-p1-name"></div>
+        <div class="opt-label">Print Color 2 <small>VI + line &bull; Colorado flag on the back</small></div>
+        <div class="swatches" id="d${n}-p2"></div>
+        <div class="swatch-name" id="d${n}-p2-name"></div>
+        <div class="contrast-warn" id="d${n}-warn"></div>
+        <div class="opt-label">Sizes <small id="d${n}-size-note"></small></div>
+        <div class="size-row" id="d${n}-sizes"></div>
+      </div>
+      <div class="mockup-sticky">
+        <div class="mockup-frame">
+          <div class="mockup-day-label">Day ${n} Preview</div>
+          <div class="mockup-stage" id="d${n}-stage"></div>
+          <div class="detail-chips">
+            <div class="chip"><div class="chip-art" id="d${n}-chip-sleeve"></div><div class="chip-cap">Left sleeve &mdash; print color 1</div></div>
+            <div class="chip"><div class="chip-art" id="d${n}-chip-back"></div><div class="chip-cap">Upper back &mdash; Colorado flag &mdash; print color 2</div></div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  sec.querySelectorAll('.garment-tab').forEach(t => {
+    t.onclick = () => {
+      const day = state['day' + n];
+      if (day.garment !== t.dataset.g) {
+        day.garment = t.dataset.g;
+        day.shirt = null; day.sizes = [null, null, null];
+        refresh();
+      }
+    };
+  });
+  [1, 2].forEach(p => {
+    const wrap = $(`d${n}-p${p}`);
+    VINYL.forEach(v => {
+      const s = document.createElement('div');
+      s.className = 'swatch'; s.style.background = v.hex; s.dataset.name = v.name;
+      if (v.light) s.dataset.light = '1';
+      s.title = v.name;
+      s.onclick = () => { state['day' + n]['print' + p] = v.name; refresh(); };
+      wrap.appendChild(s);
+    });
+  });
+}
+buildDay(1); buildDay(2);
+
+/* ════════════════════ RENDER ════════════════════ */
+function refresh() {
+  document.querySelectorAll('.div-card').forEach(c => c.classList.toggle('sel', c.dataset.id === state.division));
+  const pv = $('name-preview');
+  const pvW = pv.clientWidth || 600;
+  renderLockup(pv, pvW, state.teamName, vinylHex(state.day1.print1) || '#ffffff', vinylHex(state.day1.print2) || '#d4291a');
+  [1, 2].forEach(n => renderDay(n));
+  renderReview();
+}
+
+function renderDay(n) {
+  const day = state['day' + n];
+  const female = isFemale();
+  const tabs = $(`d${n}-tabs`);
+  tabs.style.display = female ? 'flex' : 'none';
+  $(`d${n}-garment-label`).style.display = female ? 'block' : 'none';
+  if (!female && day.garment !== 'unisex') { day.garment = 'unisex'; day.shirt = null; day.sizes = [null, null, null]; }
+  tabs.querySelectorAll('.garment-tab').forEach(t => t.classList.toggle('sel', t.dataset.g === day.garment));
+
+  const grid = $(`d${n}-shirts`);
+  if (grid.dataset.g !== day.garment) {
+    grid.dataset.g = day.garment;
+    grid.innerHTML = '';
+    SHIRTS.filter(s => s.garment === day.garment).forEach(s => {
+      const c = document.createElement('div');
+      c.className = 'shirt-card'; c.dataset.id = s.id;
+      c.innerHTML = `<img src="${s.img}" alt="${s.label}" loading="lazy"><div>${s.label}</div>`;
+      c.onclick = () => { day.shirt = s.id; refresh(); };
+      grid.appendChild(c);
+    });
+  }
+  grid.querySelectorAll('.shirt-card').forEach(c => c.classList.toggle('sel', c.dataset.id === day.shirt));
+
+  [1, 2].forEach(p => {
+    $(`d${n}-p${p}`).querySelectorAll('.swatch').forEach(s => s.classList.toggle('sel', s.dataset.name === day['print' + p]));
+    $(`d${n}-p${p}-name`).textContent = day['print' + p] || '';
+  });
+
+  // contrast warning
+  const warn = $(`d${n}-warn`);
+  const sh = shirtById(day.shirt);
+  const clashes = [];
+  if (sh) {
+    [day.print1, day.print2].forEach(pn => {
+      if (!pn) return;
+      const v = VINYL.find(x => x.name === pn);
+      if (Math.abs(lum(sh.sw) - lum(v.hex)) < 0.18 && colorDist(sh.sw, v.hex) < 130) clashes.push(pn);
+    });
+  }
+  warn.classList.toggle('show', clashes.length > 0);
+  if (clashes.length) warn.textContent = `Heads up: ${clashes.join(' and ')} print may be hard to see on this shirt color. Totally allowed — just make sure it's the look you want.`;
+
+  // sizes
+  const sizesWrap = $(`d${n}-sizes`);
+  const opts = day.garment === 'crop' ? SIZES_CROP : SIZES_UNISEX;
+  $(`d${n}-size-note`).textContent = day.garment === 'crop' ? 'crops run S–XXL (no XS)' : 'XS–XXL';
+  if (sizesWrap.dataset.g !== day.garment) {
+    sizesWrap.dataset.g = day.garment;
+    sizesWrap.innerHTML = '';
+    for (let i = 0; i < 3; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'size-cell';
+      cell.innerHTML = `<label>Athlete ${i + 1}</label><select data-i="${i}"><option value="">Size…</option>${opts.map(o => `<option>${o}</option>`).join('')}</select>`;
+      cell.querySelector('select').onchange = e => { day.sizes[i] = e.target.value || null; renderReview(); };
+      sizesWrap.appendChild(cell);
+    }
+  }
+  sizesWrap.querySelectorAll('select').forEach((s, i) => { s.value = day.sizes[i] || ''; });
+
+  renderMockup(n);
+}
+
+function renderMockup(n) {
+  const day = state['day' + n];
+  const stage = $(`d${n}-stage`);
+  const sh = shirtById(day.shirt);
+  const c1 = vinylHex(day.print1) || '#ffffff';
+  const c2 = vinylHex(day.print2) || '#d4291a';
+  const chipS = $(`d${n}-chip-sleeve`), chipB = $(`d${n}-chip-back`);
+  if (!sh) {
+    stage.innerHTML = `<div style="padding:70px 20px;text-align:center;color:#aaa;font-size:14px">Pick a shirt to see your mockup</div>`;
+    [chipS, chipB].forEach(c => { c.style.background = '#eee'; c.innerHTML = ''; });
+    return;
+  }
+  stage.innerHTML = `<img class="shirt-photo" src="${sh.img}" alt="">
+    <div class="print-chest" id="d${n}-chest"></div>
+    <div class="print-sleeve" id="d${n}-sleeve"></div>`;
+  const img = stage.querySelector('img');
+  const place = () => {
+    const W = stage.clientWidth;
+    const chest = $(`d${n}-chest`);
+    chest.style.left = ((sh.chest.cx || 50) - sh.chest.w / 2) + '%';
+    chest.style.width = sh.chest.w + '%';
+    const totalH = renderLockup(chest, sh.chest.w / 100 * W, state.teamName, c1, c2);
+    chest.style.top = `calc(${sh.chest.cy}% - ${totalH / 2}px)`;
+    const sl = $(`d${n}-sleeve`);
+    sl.style.cssText = `position:absolute;left:${sh.sleeve.x - sh.sleeve.w / 2}%;top:${sh.sleeve.y}%;width:${sh.sleeve.w}%;aspect-ratio:.988;background:${c1};` +
+      maskCss('assets/sleeve.png') + `transform:rotate(${sh.sleeve.rot}deg);`;
+  };
+  if (img.complete && img.naturalWidth) place(); else img.onload = place;
+
+  [ [chipS, `<div style="width:74px;aspect-ratio:.988;background:${c1};${maskCss('assets/sleeve.png')}"></div>`],
+    [chipB, `<div style="width:96px;aspect-ratio:1.5;background:${c2};${maskCss('assets/co-flag.png')}"></div>`]
+  ].forEach(([chip, art]) => {
+    chip.style.background = `url(${sh.img})`;
+    chip.style.backgroundSize = '300%';
+    chip.style.backgroundPosition = sh.bg;
+    chip.innerHTML = art;
+  });
+}
+
+/* ════════════════════ REVIEW + SUBMIT ════════════════════ */
+function lum(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  return (0.2126 * (n >> 16) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
+}
+function colorDist(a, b) {
+  const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16);
+  return Math.hypot((pa >> 16) - (pb >> 16), ((pa >> 8) & 255) - ((pb >> 8) & 255), (pa & 255) - (pb & 255));
+}
+function dayComplete(n) {
+  const d = state['day' + n];
+  return d.shirt && d.print1 && d.print2 && d.sizes.every(Boolean);
+}
+function missing() {
+  const m = [];
+  if (!state.division) m.push('division');
+  if (!state.teamName.trim()) m.push('team name');
+  if (!dayComplete(1)) m.push('Day 1 kit');
+  if (!dayComplete(2)) m.push('Day 2 kit');
+  if (!$('cap-name').value.trim()) m.push('captain name');
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test($('cap-email').value.trim())) m.push('captain email');
+  return m;
+}
+function daySpec(n) {
+  const d = state['day' + n];
+  const sh = shirtById(d.shirt);
+  return sh
+    ? `${sh.label} — ${sh.product} &bull; print 1: ${d.print1 || '<span class="review-missing">—</span>'} &bull; print 2: ${d.print2 || '<span class="review-missing">—</span>'} &bull; sizes: ${d.sizes.map(s => s || '—').join(' / ')}`
+    : '<span class="review-missing">not picked yet</span>';
+}
+function renderReview() {
+  const m = missing();
+  $('review-box').innerHTML =
+    `<b>Division:</b> ${state.division || '<span class="review-missing">—</span>'}<br>` +
+    `<b>Team:</b> ${state.teamName ? state.teamName.toUpperCase() : '<span class="review-missing">—</span>'}<br>` +
+    `<b>Day 1:</b> ${daySpec(1)}<br>` +
+    `<b>Day 2:</b> ${daySpec(2)}` +
+    (m.length ? `<br><span class="review-missing">Still needed: ${m.join(', ')}</span>` : '');
+  $('submit-btn').disabled = m.length > 0 || state.submitting;
+}
+['cap-name', 'cap-email'].forEach(id => $(id).addEventListener('input', renderReview));
+
+/* Canvas mockup snapshot for the order email */
+async function snapshotDay(n) {
+  const day = state['day' + n];
+  const sh = shirtById(day.shirt);
+  const c1 = vinylHex(day.print1), c2 = vinylHex(day.print2);
+  const img = await loadImg(sh.img);
+  const W = 900, H = Math.round(W * img.naturalHeight / img.naturalWidth);
+  const c = document.createElement('canvas'); c.width = W; c.height = H + 44;
+  const x = c.getContext('2d');
+  x.fillStyle = '#fff'; x.fillRect(0, 0, W, H + 44);
+  x.drawImage(img, 0, 0, W, H);
+  const lkW = sh.chest.w / 100 * W;
+  await drawLockup(x, ((sh.chest.cx || 50) - sh.chest.w / 2) / 100 * W, sh.chest.cy / 100 * H - lockupHeight(state.teamName, lkW) / 2, lkW, state.teamName, c1, c2);
+  const slW = sh.sleeve.w / 100 * W;
+  const slX = (sh.sleeve.x - sh.sleeve.w / 2) / 100 * W, slY = sh.sleeve.y / 100 * H;
+  const sleeve = await tintedMask('assets/sleeve.png', c1);
+  x.save();
+  x.translate(slX + slW / 2, slY + slW / 0.988 / 2);
+  x.rotate(sh.sleeve.rot * Math.PI / 180);
+  x.drawImage(sleeve, -slW / 2, -slW / 0.988 / 2, slW, slW / 0.988);
+  x.restore();
+  x.fillStyle = '#131313'; x.fillRect(0, H, W, 44);
+  x.fillStyle = '#fff'; x.font = '700 22px Tungsten, sans-serif';
+  x.fillText(`DAY ${n}  —  ${sh.label.toUpperCase()} ${sh.product.toUpperCase()}  —  PRINT 1 ${day.print1.toUpperCase()}  /  PRINT 2 ${day.print2.toUpperCase()}  —  SIZES ${day.sizes.join(' / ')}`, 14, H + 29);
+  return c.toDataURL('image/jpeg', 0.85).split(',')[1];
+}
+
+$('submit-btn').onclick = async () => {
+  if (missing().length || state.submitting) return;
+  state.submitting = true;
+  const btn = $('submit-btn');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  let mockups = [];
+  try {
+    mockups = [
+      { fileName: 'day1-mockup.jpg', mimeType: 'image/jpeg', data: await snapshotDay(1) },
+      { fileName: 'day2-mockup.jpg', mimeType: 'image/jpeg', data: await snapshotDay(2) },
+    ];
+  } catch (e) { /* mockups are nice-to-have; the text spec below is authoritative */ }
+  const payload = {
+    action: 'ironGamesKit',
+    division: state.division,
+    teamName: state.teamName.trim().toUpperCase(),
+    captain: { name: $('cap-name').value.trim(), email: $('cap-email').value.trim() },
+    day1: packDay(1), day2: packDay(2),
+    mockups,
+    page: location.href,
+  };
+  try {
+    const res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+    const out = await res.json();
+    if (out.status !== 'ok') throw new Error(out.message || 'submit failed');
+    $('success-msg').innerHTML = `<b>${payload.teamName}</b> — your Day 1 and Day 2 shirts are in the print queue.<br>` +
+      `A confirmation just went to <b>${payload.captain.email}</b>.<br><br>` +
+      `Change of heart? Email <a href="mailto:kodacustomapparel@gmail.com">kodacustomapparel@gmail.com</a> before Sept 18.`;
+    $('success-overlay').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  } catch (e) {
+    alert('Something went wrong sending your kit — please try again, or email kodacustomapparel@gmail.com with your picks.');
+    state.submitting = false;
+    btn.disabled = false; btn.textContent = 'Submit Team Kit';
+    return;
+  }
+};
+function packDay(n) {
+  const d = state['day' + n];
+  const sh = shirtById(d.shirt);
+  return { garment: sh.product, color: sh.label, print1: d.print1, print2: d.print2, sizes: d.sizes.slice() };
+}
+
+/* init */
+refresh();
+document.fonts.ready.then(refresh);
+window.addEventListener('resize', refresh);
+</script>
+</body>
+</html>

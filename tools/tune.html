@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<base href="../">
+<title>Kit tuner — placement QA</title>
+<style>
+  @font-face { font-family: 'Tungsten'; src: url('assets/fonts/Tungsten-Bold.woff2') format('woff2'); font-weight: 700; }
+  @font-face { font-family: 'Tungsten'; src: url('assets/fonts/Tungsten-Semibold.woff2') format('woff2'); font-weight: 600; }
+  @font-face { font-family: 'Tungsten'; src: url('assets/fonts/Tungsten-Black.woff2') format('woff2'); font-weight: 900; }
+  body { margin: 0; background: #fff; font: 12px sans-serif; }
+  .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 10px; }
+  .cell { border: 1px solid #ddd; padding: 5px; }
+  .stage { position: relative; }
+  .stage img { width: 100%; display: block; }
+  .cap { text-align: center; padding: 3px; font-weight: 600; }
+  .weights { display: flex; gap: 20px; align-items: flex-start; padding: 16px; background: #fff; }
+  .weights .col { text-align: left; }
+  .weights .lbl { font: 11px sans-serif; color: #888; }
+  .wsample { font-family: Tungsten; text-transform: uppercase; font-size: 64px; line-height: 1; }
+</style>
+</head>
+<body>
+<div class="weights" id="weights">
+  <div class="col"><div class="lbl">original .ai sample (reference render)</div><img id="ref" style="width:520px" src="tools/ref-name.png" onerror="this.style.display='none';document.getElementById('ref-missing').style.display='block'"><div id="ref-missing" style="display:none;color:#c00">tools/ref-name.png missing</div></div>
+  <div class="col"><div class="lbl">Tungsten Semibold 600</div><div class="wsample" style="font-weight:600">Team Koda Iron View</div></div>
+  <div class="col"><div class="lbl">Tungsten Bold 700</div><div class="wsample" style="font-weight:700">Team Koda Iron View</div></div>
+  <div class="col"><div class="lbl">Tungsten Black 900</div><div class="wsample" style="font-weight:900">Team Koda Iron View</div></div>
+</div>
+<div class="grid" id="grid"></div>
+<script src="assets/kit-core.js"></script>
+<script>
+  // options come from the hash (survives static-server clean-url redirects): #name=ABC&grid=1
+  const params = new URLSearchParams(location.hash.replace(/^#/, ''));
+  const NAME = params.get('name') || 'WOD TO EXPECT WHEN YOU\'RE EXPECTING';
+  const C1 = params.get('c1') || '#ffffff';
+  const C2 = params.get('c2') || '#d4291a';
+  const GRID = params.get('grid') === '1';
+  const grid = document.getElementById('grid');
+  SHIRTS.forEach(sh => {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.innerHTML = `<div class="stage"><img src="${sh.img}"><div class="chest" style="position:absolute"></div><div class="sleeve"></div></div><div class="cap">${sh.id}</div>`;
+    grid.appendChild(cell);
+    const img = cell.querySelector('img');
+    const place = () => {
+      const W = img.clientWidth;
+      const chest = cell.querySelector('.chest');
+      chest.style.left = ((sh.chest.cx || 50) - sh.chest.w / 2) + '%';
+      chest.style.width = sh.chest.w + '%';
+      const totalH = renderLockup(chest, sh.chest.w / 100 * W, NAME, C1, C2);
+      chest.style.top = `calc(${sh.chest.cy}% - ${totalH / 2}px)`;
+      const sl = cell.querySelector('.sleeve');
+      sl.style.cssText = `position:absolute;left:${sh.sleeve.x - sh.sleeve.w / 2}%;top:${sh.sleeve.y}%;width:${sh.sleeve.w}%;aspect-ratio:.988;background:${C1};` +
+        maskCss('assets/sleeve.png') + `transform:rotate(${sh.sleeve.rot}deg);`;
+      if (GRID && !cell.querySelector('.grid-overlay')) {
+        const H = img.clientHeight;
+        const g = document.createElement('div');
+        g.className = 'grid-overlay';
+        g.style.cssText = 'position:absolute;inset:0;pointer-events:none;';
+        let html = '';
+        for (let p = 10; p < 100; p += 10) {
+          html += `<div style="position:absolute;left:0;right:0;top:${p}%;border-top:1px solid rgba(255,0,255,.55);font:9px monospace;color:#f0f;">${p}</div>`;
+          html += `<div style="position:absolute;top:0;bottom:0;left:${p}%;border-left:1px solid rgba(0,180,255,.5);"><span style="font:9px monospace;color:#09f;position:absolute;bottom:0">${p}</span></div>`;
+        }
+        g.innerHTML = html;
+        cell.querySelector('.stage').appendChild(g);
+      }
+    };
+    if (img.complete && img.naturalWidth) place(); else img.onload = place;
+  });
+  document.fonts.ready.then(() => setTimeout(() => {
+    grid.querySelectorAll('.cell img').forEach(i => i.dispatchEvent(new Event('load')));
+    document.title = 'READY';
+  }, 300));
+</script>
+</body>
+</html>
