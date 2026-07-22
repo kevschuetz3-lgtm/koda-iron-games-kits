@@ -71,9 +71,7 @@
   }
   .div-card:hover { border-color: #bbb; transform: translateY(-1px); }
   .div-card.sel { border-color: var(--red); background: #fdf3f2; }
-  .div-card .tung { font-weight: 700; font-size: 30px; line-height: .95; }
-  .div-card small { color: var(--muted); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; }
-  .div-card.sel small { color: var(--red); }
+  .div-card .tung { font-weight: 700; font-size: clamp(24px, 4.5vw, 30px); line-height: .95; }
 
   /* Team name */
   .team-input { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
@@ -182,14 +180,14 @@
 <main>
   <!-- STEP 1: DIVISION -->
   <section class="step" id="step-division">
-    <div class="step-head"><div class="step-num">1</div><h2>Your Division</h2></div>
+    <div class="step-head"><div class="step-num">A)</div><h2>Your Division</h2></div>
     <p class="step-sub">Teams of 3 — pick the division you registered in.</p>
     <div class="div-grid" id="div-grid"></div>
   </section>
 
   <!-- STEP 2: TEAM NAME -->
   <section class="step" id="step-name">
-    <div class="step-head"><div class="step-num">2</div><h2>Team Name</h2></div>
+    <div class="step-head"><div class="step-num">B)</div><h2>Team Name</h2></div>
     <p class="step-sub">Printed across the chest of every shirt, in the official Iron Games type. Short names print big; longer names break onto two lines.</p>
     <div class="team-input">
       <input id="team-name" type="text" maxlength="42" placeholder="YOUR TEAM NAME" autocomplete="off">
@@ -207,7 +205,7 @@
 
   <!-- STEP 5: REVIEW -->
   <section class="step" id="step-review">
-    <div class="step-head"><div class="step-num">5</div><h2>Lock It In</h2></div>
+    <div class="step-head"><div class="step-num">E)</div><h2>Lock It In</h2></div>
     <p class="step-sub">Your kit spec goes straight to our print shop. We'll email you a confirmation copy.</p>
     <div class="cap-grid">
       <div class="field"><label>Captain name</label><input id="cap-name" type="text" autocomplete="name"></div>
@@ -252,7 +250,7 @@ const shirtById = id => SHIRTS.find(s => s.id === id);
 DIVISIONS.forEach(d => {
   const card = document.createElement('div');
   card.className = 'div-card'; card.dataset.id = d.id;
-  card.innerHTML = `<div class="tung">${d.top}</div><small>${d.sub} &bull; team of 3</small>`;
+  card.innerHTML = `<div class="tung">${d.top} ${d.sub}</div>`;
   card.onclick = () => { state.division = d.id; refresh(); };
   $('div-grid').appendChild(card);
 });
@@ -266,7 +264,7 @@ $('team-name').addEventListener('input', e => {
 function buildDay(n) {
   const sec = $('step-day' + n);
   sec.innerHTML = `
-    <div class="step-head"><div class="step-num">${n + 2}</div><h2>Day ${n} Shirts</h2></div>
+    <div class="step-head"><div class="step-num">${String.fromCharCode(66 + n)})</div><h2>Day ${n} Shirts</h2></div>
     <p class="step-sub">${n === 1 ? 'Saturday' : 'Sunday'} — pick your shirt, then the two print colors. All 3 athletes get this shirt.</p>
     <div class="kit-cols">
       <div>
@@ -406,8 +404,7 @@ function renderMockup(n) {
     return;
   }
   stage.innerHTML = `<img class="shirt-photo" src="${sh.img}" alt="">
-    <div class="print-chest" id="d${n}-chest"></div>
-    <div class="print-sleeve" id="d${n}-sleeve"></div>`;
+    <div class="print-chest" id="d${n}-chest"></div>`;
   const img = stage.querySelector('img');
   const place = () => {
     const W = stage.clientWidth;
@@ -416,9 +413,6 @@ function renderMockup(n) {
     chest.style.width = sh.chest.w + '%';
     const totalH = renderLockup(chest, sh.chest.w / 100 * W, state.teamName, c1, c2);
     chest.style.top = `calc(${sh.chest.cy}% - ${totalH / 2}px)`;
-    const sl = $(`d${n}-sleeve`);
-    sl.style.cssText = `position:absolute;left:${sh.sleeve.x - sh.sleeve.w / 2}%;top:${sh.sleeve.y}%;width:${sh.sleeve.w}%;aspect-ratio:.988;background:${c1};` +
-      maskCss('assets/sleeve.png') + `transform:rotate(${sh.sleeve.rot}deg);`;
   };
   if (img.complete && img.naturalWidth) place(); else img.onload = place;
 
@@ -487,14 +481,6 @@ async function snapshotDay(n) {
   x.drawImage(img, 0, 0, W, H);
   const lkW = sh.chest.w / 100 * W;
   await drawLockup(x, ((sh.chest.cx || 50) - sh.chest.w / 2) / 100 * W, sh.chest.cy / 100 * H - lockupHeight(state.teamName, lkW) / 2, lkW, state.teamName, c1, c2);
-  const slW = sh.sleeve.w / 100 * W;
-  const slX = (sh.sleeve.x - sh.sleeve.w / 2) / 100 * W, slY = sh.sleeve.y / 100 * H;
-  const sleeve = await tintedMask('assets/sleeve.png', c1);
-  x.save();
-  x.translate(slX + slW / 2, slY + slW / 0.988 / 2);
-  x.rotate(sh.sleeve.rot * Math.PI / 180);
-  x.drawImage(sleeve, -slW / 2, -slW / 0.988 / 2, slW, slW / 0.988);
-  x.restore();
   x.fillStyle = '#131313'; x.fillRect(0, H, W, 44);
   x.fillStyle = '#fff'; x.font = '700 22px Tungsten, sans-serif';
   x.fillText(`DAY ${n}  —  ${sh.label.toUpperCase()} ${sh.product.toUpperCase()}  —  PRINT 1 ${day.print1.toUpperCase()}  /  PRINT 2 ${day.print2.toUpperCase()}  —  SIZES ${day.sizes.join(' / ')}`, 14, H + 29);
