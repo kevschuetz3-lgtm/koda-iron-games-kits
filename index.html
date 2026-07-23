@@ -60,7 +60,10 @@
   .step-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 6px; }
   .step-num { font-family: 'Tungsten'; font-weight: 900; font-size: 44px; color: var(--red); line-height: 1; }
   .step-head h2 { font-family: 'Tungsten'; font-weight: 700; text-transform: uppercase; font-size: clamp(30px, 5vw, 40px); line-height: 1; letter-spacing: .015em; }
+  .step-head h2.day-title { font-size: clamp(42px, 7vw, 56px); }
   .step-sub { color: var(--muted); font-size: 14.5px; margin-bottom: 22px; }
+  .step-sub.day-sub { font-size: clamp(17px, 2.6vw, 20px); font-weight: 600; color: #2e2e2e; }
+  .hidden { display: none !important; }
 
   /* Division grid */
   .div-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
@@ -81,14 +84,15 @@
   }
   #team-name:focus { outline: none; border-color: var(--ink); }
   .char-note { font-size: 12.5px; color: var(--muted); }
-  .name-preview-wrap { margin-top: 22px; background: var(--ink); border-radius: 12px; padding: clamp(18px, 4vw, 34px); }
-  .name-preview-label { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: #888; margin-bottom: 14px; }
+  .name-preview-wrap { margin-top: 8px; background: var(--ink); border-radius: 12px; padding: clamp(18px, 4vw, 34px); }
+  .name-preview-label { font-family: 'Tungsten'; font-weight: 600; text-transform: uppercase; font-size: 21px; letter-spacing: .06em; margin-top: 24px; }
 
   /* Kit builder */
   .kit-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: start; }
   @media (max-width: 880px) { .kit-cols { grid-template-columns: 1fr; } }
   .opt-label { font-family: 'Tungsten'; font-weight: 600; text-transform: uppercase; font-size: 21px; letter-spacing: .04em; margin: 20px 0 10px; }
   .opt-label:first-child { margin-top: 0; }
+  .opt-label.garment-label { font-size: clamp(26px, 4.5vw, 32px); }
   .opt-label small { font-family: 'Poppins'; font-size: 11.5px; text-transform: none; letter-spacing: 0; color: var(--muted); font-weight: 400; margin-left: 8px; }
 
   .garment-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
@@ -188,13 +192,13 @@
   <!-- STEP 2: TEAM NAME -->
   <section class="step" id="step-name">
     <div class="step-head"><div class="step-num">B)</div><h2>Team Name</h2></div>
-    <p class="step-sub">Printed across the chest of every shirt, in the official Iron Games type. Short names print big; longer names break onto two lines.</p>
+    <p class="step-sub">Every athlete receives 2 custom shirts with their team name (1 for each day).</p>
     <div class="team-input">
       <input id="team-name" type="text" maxlength="42" placeholder="YOUR TEAM NAME" autocomplete="off">
       <span class="char-note"><span id="char-count">0</span>/42</span>
     </div>
+    <div class="name-preview-label">Print Preview</div>
     <div class="name-preview-wrap">
-      <div class="name-preview-label">Print preview</div>
       <div id="name-preview"></div>
     </div>
   </section>
@@ -264,11 +268,11 @@ $('team-name').addEventListener('input', e => {
 function buildDay(n) {
   const sec = $('step-day' + n);
   sec.innerHTML = `
-    <div class="step-head"><div class="step-num">${String.fromCharCode(66 + n)})</div><h2>Day ${n} Shirts</h2></div>
-    <p class="step-sub">${n === 1 ? 'Saturday' : 'Sunday'} — pick your shirt, then the two print colors. All 3 athletes get this shirt.</p>
+    <div class="step-head"><div class="step-num">${String.fromCharCode(66 + n)})</div><h2 class="day-title">Day ${n} Shirts</h2></div>
+    <p class="step-sub day-sub">${n === 1 ? 'Saturday' : 'Sunday'}: pick your shirt color, then the two print colors. All 3 athletes get this shirt in their size.</p>
     <div class="kit-cols">
       <div>
-        <div class="opt-label" id="d${n}-garment-label">Garment</div>
+        <div class="opt-label garment-label" id="d${n}-garment-label">Pick Your Garment</div>
         <div class="garment-tabs" id="d${n}-tabs">
           <div class="garment-tab" data-g="unisex">Unisex Tee</div>
           <div class="garment-tab" data-g="crop">Crop</div>
@@ -322,6 +326,10 @@ buildDay(1); buildDay(2);
 /* ════════════════════ RENDER ════════════════════ */
 function refresh() {
   document.querySelectorAll('.div-card').forEach(c => c.classList.toggle('sel', c.dataset.id === state.division));
+  // everything below the division picker stays hidden until a division is chosen
+  const ready = !!state.division;
+  ['step-name', 'step-day1', 'step-day2', 'step-review'].forEach(id => $(id).classList.toggle('hidden', !ready));
+  if (!ready) return;
   const pv = $('name-preview');
   const pvW = pv.clientWidth || 600;
   renderLockup(pv, pvW, state.teamName, vinylHex(state.day1.print1) || '#ffffff', vinylHex(state.day1.print2) || '#d4291a');
@@ -334,7 +342,9 @@ function renderDay(n) {
   const female = isFemale();
   const tabs = $(`d${n}-tabs`);
   tabs.style.display = female ? 'flex' : 'none';
-  $(`d${n}-garment-label`).style.display = female ? 'block' : 'none';
+  const gLabel = $(`d${n}-garment-label`);
+  gLabel.style.display = female ? 'block' : 'none';
+  gLabel.textContent = female ? 'Pick Your Garment (Shirt or Crop)' : 'Pick Your Garment';
   if (!female && day.garment !== 'unisex') { day.garment = 'unisex'; day.shirt = null; day.sizes = [null, null, null]; }
   tabs.querySelectorAll('.garment-tab').forEach(t => t.classList.toggle('sel', t.dataset.g === day.garment));
 
